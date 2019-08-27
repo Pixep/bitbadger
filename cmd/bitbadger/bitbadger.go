@@ -1,10 +1,12 @@
 package main
 
 import (
+	"errors"
+	"os"
+
 	bitbadger "github.com/Pixep/bitbadger/internal/bitbadger"
 	log "github.com/Sirupsen/logrus"
 	"github.com/urfave/cli"
-	"os"
 )
 
 var (
@@ -22,6 +24,18 @@ func main() {
 		cli.BoolFlag{
 			Name:  "debug, d",
 			Usage: "Enable debug mode",
+		},
+		cli.BoolFlag{
+			Name:  "insecure, i",
+			Usage: "Enable insecure HTTP, without TLS",
+		},
+		cli.StringFlag{
+			Name:  "cert, c",
+			Usage: "Path to TLS certificate",
+		},
+		cli.StringFlag{
+			Name:  "key, k",
+			Usage: "Path to TLS private key",
 		},
 		cli.IntFlag{
 			Name:  "port, p",
@@ -50,6 +64,21 @@ func start(c *cli.Context) error {
 
 	log.Info("Serving badges as '", config.Username, "'")
 
-	bitbadger.Serve(c.Int("port"))
+	if c.Bool("insecure") {
+		log.Info("Running in HTTP-mode")
+		bitbadger.ServeWithHTTP(c.Int("port"))
+	} else {
+		certFile := c.String("cert")
+		if certFile == "" {
+			log.Error("No certificate provided.")
+			return errors.New("No certificate was provided")
+		}
+
+		keyFile := c.String("key")
+		if keyFile == "" {
+			return errors.New("No private key was provided")
+		}
+		bitbadger.ServeWithHTTPS(c.Int("port"), certFile, keyFile)
+	}
 	return nil
 }
