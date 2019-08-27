@@ -14,9 +14,16 @@ import (
 var client = &http.Client{}
 
 // Serve starts the HTTP bitbadger server on the specificed port
-func Serve(port int) error {
+func ServeWithHTTP(port int) error {
 	http.HandleFunc("/", httpHandler)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), nil))
+	return nil
+}
+
+// Serve starts the HTTPS bitbadger server on the specificed port
+func ServeWithHTTPS(port int, certFile, keyFile string) error {
+	http.HandleFunc("/", httpHandler)
+	log.Fatal(http.ListenAndServeTLS(":"+strconv.Itoa(port), certFile, keyFile, nil))
 	return nil
 }
 
