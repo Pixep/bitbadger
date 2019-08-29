@@ -52,7 +52,7 @@ func DownloadBadge(badgeInfo BadgeInfo) (*BadgeImage, error) {
 
 	image := &BadgeImage{
 		Data:      body,
-		Extension: "svg",
+		Extension: "svg+xml",
 	}
 	return image, nil
 }
