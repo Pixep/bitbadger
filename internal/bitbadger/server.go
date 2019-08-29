@@ -39,7 +39,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	badgeType := BadgeType(paths[2])
+	badgeType := BadgeType(strings.TrimSuffix(paths[2], ".svg"))
 	switch badgeType {
 	case OpenPRType, AveragePRTimeType:
 	default:
