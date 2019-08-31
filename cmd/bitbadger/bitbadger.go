@@ -3,6 +3,7 @@ package main
 import (
 	"errors"
 	"os"
+	"time"
 
 	bitbadger "github.com/Pixep/bitbadger/internal/bitbadger"
 	log "github.com/Sirupsen/logrus"
@@ -11,7 +12,7 @@ import (
 
 var (
 	// VERSION stores the current version as string
-	VERSION = "v0.1.0"
+	VERSION = "v0.1.1"
 )
 
 func main() {
@@ -42,6 +43,11 @@ func main() {
 			Usage: "Set the port that the server listens on",
 			Value: 34000,
 		},
+		cli.IntFlag{
+			Name:  "cachevalidity",
+			Usage: "Set for how long the requests should be cached in minutes",
+			Value: 0,
+		},
 	}
 
 	app.Run(os.Args)
@@ -61,6 +67,10 @@ func start(c *cli.Context) error {
 		Password: c.Args().Get(1),
 	}
 	bitbadger.SetConfig(config)
+
+	bitbadger.SetCachePolicy(bitbadger.CachePolicy{
+		ValidityDuration: time.Duration(c.Int("cachevalidity")) * time.Minute,
+	})
 
 	log.Info("Serving badges as '", config.Username, "'")
 
