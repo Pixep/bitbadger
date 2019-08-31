@@ -42,6 +42,11 @@ func GetCachePolicy() CachePolicy {
 // CacheRequestResult caches the result to a request and
 // sets it as refreshed "Now()"
 func CacheRequestResult(request BadgeRequest, image *BadgeImage) {
+	// Don't cache request if cache is disabled
+	if cachePolicy.ValidityDuration == 0 {
+		return
+	}
+
 	cacheMap[request] = CacheEntry{
 		Request:     request,
 		ImageResult: image,
