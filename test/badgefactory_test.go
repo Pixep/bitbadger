@@ -15,6 +15,7 @@ func TestGetBadgeType(t *testing.T) {
 		{"open-pr-count", bitbadger.OpenPRCountType},
 		{"avg-pr-time", bitbadger.AveragePRTimeType},
 		{"oldest-pr-time", bitbadger.OldestOpenPRTime},
+		{"avg-pr-merge-time", bitbadger.AveragePRMergeTime},
 	}
 
 	for _, c := range cases {
@@ -34,46 +35,38 @@ func TestGetBadgeType(t *testing.T) {
 }
 
 func TestGenerateBadgeInfo(t *testing.T) {
-	badgeInfo, _ := bitbadger.GenerateBadgeInfo(bitbadger.OpenPRCountType, bitbadger.PullRequestsInfo{
-		OpenCount: 999,
-	})
-
-	if badgeInfo.Label != "Open PRs" {
-		t.Errorf("Incorrect label for OpenPRCountType: %s", badgeInfo.Label)
-	}
-	if badgeInfo.Message != "999" {
-		t.Errorf("Incorrect message for OpenPRCountType: %s", badgeInfo.Message)
-	}
-	if badgeInfo.Color != "red" {
-		t.Errorf("Incorrect color for OpenPRCountType: %s", badgeInfo.Color)
-	}
-
-	badgeInfo, _ = bitbadger.GenerateBadgeInfo(bitbadger.AveragePRTimeType, bitbadger.PullRequestsInfo{
-		OpenAverageTime: 5 * time.Minute,
-	})
-
-	if badgeInfo.Label != "Avg. current PRs age" {
-		t.Errorf("Incorrect label for OpenPRCountType: %s", badgeInfo.Label)
-	}
-	if badgeInfo.Message != "5 mins" {
-		t.Errorf("Incorrect message for OpenPRCountType: %s", badgeInfo.Message)
-	}
-	if badgeInfo.Color != "green" {
-		t.Errorf("Incorrect color for OpenPRCountType: %s", badgeInfo.Color)
+	cases := []struct {
+		inType          bitbadger.BadgeType
+		inInfo          bitbadger.PullRequestsInfo
+		expectedLabel   string
+		expectedMessage string
+		expectedColor   string
+	}{
+		{bitbadger.OpenPRCountType, bitbadger.PullRequestsInfo{OpenCount: 999},
+			"Open PRs", "999", "red"},
+		{bitbadger.AveragePRTimeType, bitbadger.PullRequestsInfo{
+			OpenAverageTime: 5 * time.Minute},
+			"Avg. current PRs age", "5 mins", "green"},
+		{bitbadger.OldestOpenPRTime, bitbadger.PullRequestsInfo{
+			OldestOpenPR: 5 * time.Minute},
+			"Oldest PR age", "5 mins", "green"},
+		{bitbadger.AveragePRMergeTime, bitbadger.PullRequestsInfo{
+			AveragePRMergeTime: 5 * time.Minute},
+			"Avg. PR merge time", "5 mins", "green"},
 	}
 
-	badgeInfo, _ = bitbadger.GenerateBadgeInfo(bitbadger.OldestOpenPRTime, bitbadger.PullRequestsInfo{
-		OldestOpenPR: 5 * time.Minute,
-	})
+	for _, c := range cases {
+		badgeInfo, _ := bitbadger.GenerateBadgeInfo(c.inType, c.inInfo)
 
-	if badgeInfo.Label != "Oldest PR age" {
-		t.Errorf("Incorrect label for OpenPRCountType: %s", badgeInfo.Label)
-	}
-	if badgeInfo.Message != "5 mins" {
-		t.Errorf("Incorrect message for OpenPRCountType: %s", badgeInfo.Message)
-	}
-	if badgeInfo.Color != "green" {
-		t.Errorf("Incorrect color for OpenPRCountType: %s", badgeInfo.Color)
+		if badgeInfo.Label != c.expectedLabel {
+			t.Errorf("Incorrect label for OpenPRCountType: %s", badgeInfo.Label)
+		}
+		if badgeInfo.Message != c.expectedMessage {
+			t.Errorf("Incorrect message for OpenPRCountType: %s", badgeInfo.Message)
+		}
+		if badgeInfo.Color != c.expectedColor {
+			t.Errorf("Incorrect color for OpenPRCountType: %s", badgeInfo.Color)
+		}
 	}
 
 	_, err := bitbadger.GenerateBadgeInfo("invalid", bitbadger.PullRequestsInfo{})
