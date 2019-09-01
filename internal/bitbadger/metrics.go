@@ -9,18 +9,20 @@ import (
 	"time"
 )
 
-// BadgeType represents the type of badge / metric to
-// show
+// BadgeType represents the type of badge / metric to show.
 type BadgeType string
 
 const (
-	OpenPRCountType   BadgeType = "open-pr-count"
+	// OpenPRCountType shows the number of open PRs.
+	OpenPRCountType BadgeType = "open-pr-count"
+	// AveragePRTimeType shows the average age of currently open PRs.
 	AveragePRTimeType BadgeType = "avg-pr-time"
-	OldestOpenPRTime  BadgeType = "oldest-pr-time"
+	// OldestOpenPRTime shows the age of the oldest currently open PR.
+	OldestOpenPRTime BadgeType = "oldest-pr-time"
 )
 
-// GetBadgeType returns a BadgeType from a string, and an
-// error if there is no corresponding BadgeType.
+// GetBadgeType returns a BadgeType from a string, and an error if there is no
+//  corresponding BadgeType.
 func GetBadgeType(badgeString string) (BadgeType, error) {
 	badgeType := BadgeType(badgeString)
 	if BadgeTypeValid(badgeType) {
@@ -31,8 +33,8 @@ func GetBadgeType(badgeString string) (BadgeType, error) {
 		"Badge type can be 'open-pr-count', 'avg-pr-time', or 'oldest-pr-time'")
 }
 
-// BadgeTypeValid returns true if the BadgeType provided is
-// valid, false otherwise.
+// BadgeTypeValid returns true if the BadgeType provided is valid, false
+// otherwise.
 func BadgeTypeValid(badgeType BadgeType) bool {
 	switch badgeType {
 	case OpenPRCountType, AveragePRTimeType, OldestOpenPRTime:
@@ -42,8 +44,8 @@ func BadgeTypeValid(badgeType BadgeType) bool {
 	}
 }
 
-// GenerateBadgeInfo generates a badge from a type
-// and pull request information.
+// GenerateBadgeInfo generates a badge from a type and pull request
+// information.
 func GenerateBadgeInfo(badgeType BadgeType, prInfo PullRequestsInfo) (BadgeInfo, error) {
 	switch badgeType {
 	case OpenPRCountType:

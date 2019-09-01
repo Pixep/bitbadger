@@ -6,8 +6,8 @@ import (
 	"time"
 )
 
-// BadgeRequest holds the information relative
-// to a client badge generation request
+// BadgeRequest holds the information relative to a client badge generation
+// request.
 type BadgeRequest struct {
 	Username   string
 	Repository string
@@ -30,8 +30,7 @@ func compare(a, b BadgeRequest) bool {
 	return true
 }
 
-// PullRequestsInfo holds the pull request data
-// used to generate the badges.
+// PullRequestsInfo holds the pull request data used to generate the badges.
 type PullRequestsInfo struct {
 	OpenCount       int
 	OldestOpenPR    time.Duration
@@ -42,14 +41,16 @@ func (info PullRequestsInfo) String() string {
 	return fmt.Sprintf("%d", info.OpenCount)
 }
 
+// RepositoryType holds the type of repository service targetted.
 type RepositoryType int
 
 const (
+	// BitBucketCloud represents BitBucket Cloud service.
 	BitBucketCloud RepositoryType = iota
 )
 
 // RetrievePullRequestInfo retrieves information relative to pull requests
-// from a specific repository
+// from a specific repository.
 func RetrievePullRequestInfo(repoType RepositoryType, request BadgeRequest) (PullRequestsInfo, error) {
 	switch repoType {
 	case BitBucketCloud:

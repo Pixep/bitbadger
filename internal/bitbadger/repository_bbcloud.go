@@ -25,7 +25,7 @@ type bbPullRequestsReponse struct {
 }
 
 // RetrieveBBPullRequestInfo retrieves information relative to pull requests
-// from BitBucket Cloud
+// from BitBucket Cloud.
 func RetrieveBBPullRequestInfo(request BadgeRequest) (PullRequestsInfo, error) {
 	sourceServerRequest := "https://api.bitbucket.org/2.0/repositories/"
 	sourceServerRequest += request.Username + "/" + request.Repository

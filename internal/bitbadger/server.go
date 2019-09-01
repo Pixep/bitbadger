@@ -16,14 +16,14 @@ type serverError struct {
 
 var client = &http.Client{}
 
-// ServeWithHTTP starts the HTTP bitbadger server on the specificed port
+// ServeWithHTTP starts the HTTP bitbadger server on the specificed port.
 func ServeWithHTTP(port int) error {
 	http.HandleFunc("/", handleHTTPRequest)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), nil))
 	return nil
 }
 
-// ServeWithHTTPS starts the HTTPS bitbadger server on the specificed port
+// ServeWithHTTPS starts the HTTPS bitbadger server on the specificed port.
 func ServeWithHTTPS(port int, certFile, keyFile string) error {
 	http.HandleFunc("/", handleHTTPRequest)
 	log.Fatal(http.ListenAndServeTLS(":"+strconv.Itoa(port), certFile, keyFile, nil))

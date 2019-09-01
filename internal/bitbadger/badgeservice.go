@@ -9,15 +9,15 @@ import (
 	log "github.com/Sirupsen/logrus"
 )
 
-// Label, message and color are '-' separated
 func generateBadgeURL(badge BadgeInfo) string {
+	// Label, message and color are '-' separate in shields.io format.
 	badgetInfoURL := fmt.Sprintf("%s-%s-%s", badge.Label, badge.Message, badge.Color)
 	// Use ReplaceAll to have "%20" in place of spaces, as Golang encode uses "+" instead
 	return "https://img.shields.io/badge/" + strings.ReplaceAll(badgetInfoURL, " ", "%20")
 }
 
-// DownloadBadge downloads and returns a badge image
-// from "img.shields.io", using badgeInfo.
+// DownloadBadge downloads and returns a badge image from "img.shields.io",
+// using badgeInfo.
 func DownloadBadge(badgeInfo BadgeInfo) (*BadgeImage, error) {
 	// Get the data
 	badgeURL := generateBadgeURL(badgeInfo)
