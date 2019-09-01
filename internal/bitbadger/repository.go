@@ -33,6 +33,7 @@ func compare(a, b BadgeRequest) bool {
 // used to generate the badges.
 type PullRequestsInfo struct {
 	OpenCount       int
+	OldestOpenPR    time.Duration
 	OpenAverageTime time.Duration
 }
 

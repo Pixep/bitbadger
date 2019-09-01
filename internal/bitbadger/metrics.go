@@ -11,18 +11,21 @@ import (
 type BadgeType string
 
 const (
-	OpenPRType        BadgeType = "open-pr-count"
+	OpenPRCountType   BadgeType = "open-pr-count"
 	AveragePRTimeType BadgeType = "avg-pr-time"
+	OldestOpenPRTime  BadgeType = "oldest-pr-time"
 )
 
 // GenerateBadgeInfo generates a badge from a type
 // and pull request information
 func GenerateBadgeInfo(badgeType BadgeType, prInfo PullRequestsInfo) (BadgeInfo, error) {
 	switch badgeType {
-	case OpenPRType:
+	case OpenPRCountType:
 		return generateOpenPRCountBadge(prInfo), nil
 	case AveragePRTimeType:
 		return generateAveragePRTimeBadge(prInfo), nil
+	case OldestOpenPRTime:
+		return generateOldestOpenPRTimeBadge(prInfo), nil
 	default:
 		return BadgeInfo{}, errors.New("Invalid badge type")
 	}
@@ -50,25 +53,33 @@ func generateOpenPRCountBadge(prInfo PullRequestsInfo) (badge BadgeInfo) {
 	return
 }
 
-func generateAveragePRTimeBadge(prInfo PullRequestsInfo) (badge BadgeInfo) {
-	avgOpenTime := prInfo.OpenAverageTime
-	badge = BadgeInfo{
+func generateAveragePRTimeBadge(prInfo PullRequestsInfo) BadgeInfo {
+	return BadgeInfo{
 		Label:   "Avg PR time",
-		Message: printDuration(avgOpenTime),
+		Message: printDuration(prInfo.OpenAverageTime),
+		Color:   prOpenTimeColor(prInfo.OpenAverageTime),
 	}
+}
 
+func generateOldestOpenPRTimeBadge(prInfo PullRequestsInfo) BadgeInfo {
+	return BadgeInfo{
+		Label:   "Oldest open PR",
+		Message: printDuration(prInfo.OldestOpenPR),
+		Color:   prOpenTimeColor(prInfo.OldestOpenPR),
+	}
+}
+
+func prOpenTimeColor(openTime time.Duration) string {
 	switch {
-	case avgOpenTime < 24*time.Hour:
-		badge.Color = "green"
-	case avgOpenTime < 48*time.Hour:
-		badge.Color = "yellowgreen"
-	case avgOpenTime < 72*time.Hour:
-		badge.Color = "yellow"
-	case avgOpenTime < 96*time.Hour:
-		badge.Color = "orange"
+	case openTime < 24*time.Hour:
+		return "green"
+	case openTime < 48*time.Hour:
+		return "yellowgreen"
+	case openTime < 72*time.Hour:
+		return "yellow"
+	case openTime < 96*time.Hour:
+		return "orange"
 	default:
-		badge.Color = "red"
+		return "red"
 	}
-
-	return
 }

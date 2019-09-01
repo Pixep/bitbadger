@@ -12,7 +12,7 @@ import (
 
 var (
 	// VERSION stores the current version as string
-	VERSION = "v0.1.1"
+	VERSION = "v0.1.2"
 )
 
 func main() {

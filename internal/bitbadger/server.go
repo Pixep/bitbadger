@@ -41,7 +41,7 @@ func httpHandler(w http.ResponseWriter, r *http.Request) {
 
 	badgeType := BadgeType(strings.TrimSuffix(paths[2], ".svg"))
 	switch badgeType {
-	case OpenPRType, AveragePRTimeType:
+	case OpenPRCountType, AveragePRTimeType:
 	default:
 		errorMessage := "Invalid badge type '" + paths[2] + "'\n"
 		errorMessage += "Type can be can be 'open-pr-count', or 'avg-pr-time'"

@@ -31,17 +31,17 @@ func TestRequestCaching(t *testing.T) {
 	request1 := bitbadger.BadgeRequest{
 		Username:   "test",
 		Repository: "repo",
-		Type:       bitbadger.OpenPRType,
+		Type:       bitbadger.OpenPRCountType,
 	}
 	request2 := bitbadger.BadgeRequest{
 		Username:   "test",
 		Repository: "repo2",
-		Type:       bitbadger.OpenPRType,
+		Type:       bitbadger.OpenPRCountType,
 	}
 	request1bis := bitbadger.BadgeRequest{
 		Username:   "test",
 		Repository: "repo",
-		Type:       bitbadger.OpenPRType,
+		Type:       bitbadger.OpenPRCountType,
 	}
 
 	imageData := []byte("some-image")
@@ -95,7 +95,7 @@ func TestCacheValidityDuration(t *testing.T) {
 	request := bitbadger.BadgeRequest{
 		Username:   "test",
 		Repository: "repo",
-		Type:       bitbadger.OpenPRType,
+		Type:       bitbadger.OpenPRCountType,
 	}
 
 	bitbadger.CacheRequestResult(request, &bitbadger.BadgeImage{})
