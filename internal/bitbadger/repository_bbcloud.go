@@ -63,7 +63,9 @@ func RetrieveBBPullRequestInfo(request BadgeRequest) (PullRequestsInfo, error) {
 		return PullRequestsInfo{}, err
 	}
 
-	var openPRTotalTime time.Duration
+	openPRTotalTime := time.Duration(0)
+	oldestOpenPRTime := time.Duration(0)
+
 	now := time.Now()
 	prsWithValidTime := 0
 	for _, pullRequest := range response.PullRequests {
@@ -72,7 +74,13 @@ func RetrieveBBPullRequestInfo(request BadgeRequest) (PullRequestsInfo, error) {
 		if err != nil {
 			log.Error("Failed to parse time:", pullRequest.CreatedOn)
 		} else {
-			openPRTotalTime += now.Sub(createdOnTime)
+			openTime := now.Sub(createdOnTime)
+
+			if openTime > oldestOpenPRTime {
+				oldestOpenPRTime = openTime
+			}
+
+			openPRTotalTime += openTime
 			prsWithValidTime++
 		}
 	}
@@ -84,6 +92,7 @@ func RetrieveBBPullRequestInfo(request BadgeRequest) (PullRequestsInfo, error) {
 
 	prInfo := PullRequestsInfo{
 		OpenCount:       response.PullRequestsCount,
+		OldestOpenPR:    oldestOpenPRTime,
 		OpenAverageTime: openPRAverageTime,
 	}
 	return prInfo, nil
