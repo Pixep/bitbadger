@@ -72,14 +72,18 @@ func cleanupCache() {
 	// Find and remove oldest entry, until below threshold.
 	// Will definitely need a better implementation :)
 	for len(cacheMap) > cachePolicy.MaxCachedResults {
-		var oldestEntry *CacheEntry
-		for _, entry := range cacheMap {
-			if oldestEntry == nil || oldestEntry.RefreshTime.Before(entry.RefreshTime) {
-				oldestEntry = &entry
+		var oldestRequest BadgeRequest
+		var oldestRefreshTime time.Time
+		init := false
+		for request, entry := range cacheMap {
+			if !init || oldestRefreshTime.After(entry.RefreshTime) {
+				init = true
+				oldestRefreshTime = entry.RefreshTime
+				oldestRequest = request
 			}
 		}
 
-		delete(cacheMap, oldestEntry.Request)
+		delete(cacheMap, oldestRequest)
 	}
 }
 
