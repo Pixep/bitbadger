@@ -32,9 +32,10 @@ func compare(a, b BadgeRequest) bool {
 
 // PullRequestsInfo holds the pull request data used to generate the badges.
 type PullRequestsInfo struct {
-	OpenCount       int
-	OldestOpenPR    time.Duration
-	OpenAverageTime time.Duration
+	OpenCount          int
+	OldestOpenPR       time.Duration
+	OpenAverageTime    time.Duration
+	AveragePRMergeTime time.Duration
 }
 
 func (info PullRequestsInfo) String() string {
