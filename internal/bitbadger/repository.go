@@ -13,6 +13,22 @@ type BadgeRequest struct {
 	Type       BadgeType
 }
 
+func compare(a, b BadgeRequest) bool {
+	if a.Username != b.Username {
+		return false
+	}
+
+	if a.Repository != b.Repository {
+		return false
+	}
+
+	if a.Type != b.Type {
+		return false
+	}
+
+	return true
+}
+
 // PullRequestsInfo holds the pull request data
 // used to generate the badges.
 type PullRequestsInfo struct {
