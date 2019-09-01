@@ -52,10 +52,10 @@ func TestGenerateBadgeInfo(t *testing.T) {
 		OpenAverageTime: 5 * time.Minute,
 	})
 
-	if badgeInfo.Label != "Avg PR time" {
+	if badgeInfo.Label != "Avg. current PRs age" {
 		t.Errorf("Incorrect label for OpenPRCountType: %s", badgeInfo.Label)
 	}
-	if badgeInfo.Message != "5 minutes" {
+	if badgeInfo.Message != "5 mins" {
 		t.Errorf("Incorrect message for OpenPRCountType: %s", badgeInfo.Message)
 	}
 	if badgeInfo.Color != "green" {
@@ -66,10 +66,10 @@ func TestGenerateBadgeInfo(t *testing.T) {
 		OldestOpenPR: 5 * time.Minute,
 	})
 
-	if badgeInfo.Label != "Oldest open PR" {
+	if badgeInfo.Label != "Oldest PR age" {
 		t.Errorf("Incorrect label for OpenPRCountType: %s", badgeInfo.Label)
 	}
-	if badgeInfo.Message != "5 minutes" {
+	if badgeInfo.Message != "5 mins" {
 		t.Errorf("Incorrect message for OpenPRCountType: %s", badgeInfo.Message)
 	}
 	if badgeInfo.Color != "green" {

@@ -83,7 +83,7 @@ func generateOpenPRCountBadge(prInfo PullRequestsInfo) (badge BadgeInfo) {
 
 func generateAveragePRTimeBadge(prInfo PullRequestsInfo) BadgeInfo {
 	return BadgeInfo{
-		Label:   "Avg PR time",
+		Label:   "Avg. current PRs age",
 		Message: printDuration(prInfo.OpenAverageTime),
 		Color:   prOpenTimeColor(prInfo.OpenAverageTime),
 	}
@@ -91,7 +91,7 @@ func generateAveragePRTimeBadge(prInfo PullRequestsInfo) BadgeInfo {
 
 func generateOldestOpenPRTimeBadge(prInfo PullRequestsInfo) BadgeInfo {
 	return BadgeInfo{
-		Label:   "Oldest open PR",
+		Label:   "Oldest PR age",
 		Message: printDuration(prInfo.OldestOpenPR),
 		Color:   prOpenTimeColor(prInfo.OldestOpenPR),
 	}
@@ -124,8 +124,8 @@ func printDuration(duration time.Duration) string {
 	}{
 		{"day", days},
 		{"hour", hours},
-		{"minute", minutes},
-		{"second", seconds},
+		{"min", minutes},
+		{"sec", seconds},
 	}
 
 	parts := []string{}
