@@ -2,84 +2,84 @@ package bitbadger
 
 import (
 	"fmt"
-	"math"
 	"net/http"
 	"strconv"
 	"strings"
-	"time"
 
 	log "github.com/Sirupsen/logrus"
 )
+
+type serverError struct {
+	Message         string
+	HTTPErrorStatus int
+}
 
 var client = &http.Client{}
 
 // ServeWithHTTP starts the HTTP bitbadger server on the specificed port
 func ServeWithHTTP(port int) error {
-	http.HandleFunc("/", httpHandler)
+	http.HandleFunc("/", handleHTTPRequest)
 	log.Fatal(http.ListenAndServe(":"+strconv.Itoa(port), nil))
 	return nil
 }
 
 // ServeWithHTTPS starts the HTTPS bitbadger server on the specificed port
 func ServeWithHTTPS(port int, certFile, keyFile string) error {
-	http.HandleFunc("/", httpHandler)
+	http.HandleFunc("/", handleHTTPRequest)
 	log.Fatal(http.ListenAndServeTLS(":"+strconv.Itoa(port), certFile, keyFile, nil))
 	return nil
 }
 
-func httpHandler(w http.ResponseWriter, r *http.Request) {
-	paths := strings.Split(r.URL.Path, "/")
-	paths = paths[1:]
-
-	if len(paths) < 3 {
-		errorMessage := "Requires a request of the form: '<username>/<repository-slug>/<type>'\n"
-		errorMessage += "where <type> can be 'openpr', or 'avgprtime'"
-		log.Warn("Invalid request with: ", r.URL)
-		http.Error(w, errorMessage, http.StatusBadRequest)
+func handleHTTPRequest(w http.ResponseWriter, r *http.Request) {
+	request, httpError := parseHTTPRequest(r)
+	if httpError != nil {
+		http.Error(w, httpError.Message, httpError.HTTPErrorStatus)
 		return
-	}
-
-	badgeType := BadgeType(strings.TrimSuffix(paths[2], ".svg"))
-	switch badgeType {
-	case OpenPRCountType, AveragePRTimeType, OldestOpenPRTime:
-	default:
-		errorMessage := "Invalid badge type '" + paths[2] + "'\n"
-		errorMessage += "Type can be can  'open-pr-count', 'avg-pr-time', or 'oldest-pr-time'"
-		log.Warn("Invalid request with: ", r.URL)
-		http.Error(w, errorMessage, http.StatusBadRequest)
-		return
-	}
-	request := BadgeRequest{
-		Username:   paths[0],
-		Repository: paths[1],
-		Type:       badgeType,
 	}
 
 	log.Info("Creating badge for ", request.Username, "/", request.Repository, "/", request.Type)
 
-	badgeImage := GetCachedResult(request)
+	badgeImage := GetCachedResult(*request)
 	if badgeImage == nil {
-		newBadgeImage, httpError := generateNewBadge(request)
+		badgeImage, httpError = generateNewBadge(*request)
 		if httpError != nil {
 			http.Error(w, httpError.Message, httpError.HTTPErrorStatus)
 			return
 		}
 
-		CacheRequestResult(request, newBadgeImage)
-		badgeImage = newBadgeImage
+		CacheRequestResult(*request, badgeImage)
 	}
 
-	w.Header().Set("Content-Type", "image/"+badgeImage.Extension)
-	fmt.Fprintf(w, "%s", badgeImage.Data)
+	sendHTTPReponse(w, badgeImage)
 }
 
-func (info PullRequestsInfo) String() string {
-	return fmt.Sprintf("%d", info.OpenCount)
-}
+func parseHTTPRequest(r *http.Request) (*BadgeRequest, *serverError) {
+	paths := strings.Split(r.URL.Path, "/")
+	paths = paths[1:]
 
-type serverError struct {
-	Message         string
-	HTTPErrorStatus int
+	if len(paths) < 3 {
+		log.Warn("Invalid request: ", r.URL)
+		errorMessage := "Requires a request of the form: '<username>/<repository-slug>/<type>'"
+		return nil, &serverError{
+			Message:         errorMessage,
+			HTTPErrorStatus: http.StatusBadRequest,
+		}
+	}
+
+	badgeType, err := GetBadgeType(strings.TrimSuffix(paths[2], ".svg"))
+	if err != nil {
+		log.Warn("Invalid request: ", r.URL)
+		return nil, &serverError{
+			Message:         err.Error(),
+			HTTPErrorStatus: http.StatusBadRequest,
+		}
+	}
+
+	return &BadgeRequest{
+		Username:   paths[0],
+		Repository: paths[1],
+		Type:       badgeType,
+	}, nil
 }
 
 func generateNewBadge(request BadgeRequest) (*BadgeImage, *serverError) {
@@ -113,41 +113,7 @@ func generateNewBadge(request BadgeRequest) (*BadgeImage, *serverError) {
 	return badgeImage, nil
 }
 
-func printDuration(duration time.Duration) string {
-	days := int64(duration.Hours() / 24)
-	hours := int64(math.Mod(duration.Hours(), 24))
-	minutes := int64(math.Mod(duration.Minutes(), 60))
-	seconds := int64(math.Mod(duration.Seconds(), 60))
-
-	chunks := []struct {
-		singularName string
-		amount       int64
-	}{
-		{"day", days},
-		{"hour", hours},
-		{"minute", minutes},
-		{"second", seconds},
-	}
-
-	parts := []string{}
-
-	printedChunks := 0
-	for _, chunk := range chunks {
-		switch chunk.amount {
-		case 0:
-			continue
-		case 1:
-			parts = append(parts, fmt.Sprintf("%d %s", chunk.amount, chunk.singularName))
-			printedChunks++
-		default:
-			parts = append(parts, fmt.Sprintf("%d %ss", chunk.amount, chunk.singularName))
-			printedChunks++
-		}
-
-		if printedChunks >= 2 {
-			break
-		}
-	}
-
-	return strings.Join(parts, " ")
+func sendHTTPReponse(w http.ResponseWriter, badgeImage *BadgeImage) {
+	w.Header().Set("Content-Type", "image/"+badgeImage.Extension)
+	fmt.Fprintf(w, "%s", badgeImage.Data)
 }

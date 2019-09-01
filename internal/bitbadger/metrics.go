@@ -2,7 +2,10 @@ package bitbadger
 
 import (
 	"errors"
+	"fmt"
+	"math"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -16,8 +19,31 @@ const (
 	OldestOpenPRTime  BadgeType = "oldest-pr-time"
 )
 
+// GetBadgeType returns a BadgeType from a string, and an
+// error if there is no corresponding BadgeType.
+func GetBadgeType(badgeString string) (BadgeType, error) {
+	badgeType := BadgeType(badgeString)
+	if BadgeTypeValid(badgeType) {
+		return badgeType, nil
+	}
+
+	return badgeType, errors.New("Invalid badge type '" + badgeString + "'." +
+		"Badge type can be 'open-pr-count', 'avg-pr-time', or 'oldest-pr-time'")
+}
+
+// BadgeTypeValid returns true if the BadgeType provided is
+// valid, false otherwise.
+func BadgeTypeValid(badgeType BadgeType) bool {
+	switch badgeType {
+	case OpenPRCountType, AveragePRTimeType, OldestOpenPRTime:
+		return true
+	default:
+		return false
+	}
+}
+
 // GenerateBadgeInfo generates a badge from a type
-// and pull request information
+// and pull request information.
 func GenerateBadgeInfo(badgeType BadgeType, prInfo PullRequestsInfo) (BadgeInfo, error) {
 	switch badgeType {
 	case OpenPRCountType:
@@ -82,4 +108,43 @@ func prOpenTimeColor(openTime time.Duration) string {
 	default:
 		return "red"
 	}
+}
+
+func printDuration(duration time.Duration) string {
+	days := int64(duration.Hours() / 24)
+	hours := int64(math.Mod(duration.Hours(), 24))
+	minutes := int64(math.Mod(duration.Minutes(), 60))
+	seconds := int64(math.Mod(duration.Seconds(), 60))
+
+	chunks := []struct {
+		singularName string
+		amount       int64
+	}{
+		{"day", days},
+		{"hour", hours},
+		{"minute", minutes},
+		{"second", seconds},
+	}
+
+	parts := []string{}
+
+	printedChunks := 0
+	for _, chunk := range chunks {
+		switch chunk.amount {
+		case 0:
+			continue
+		case 1:
+			parts = append(parts, fmt.Sprintf("%d %s", chunk.amount, chunk.singularName))
+			printedChunks++
+		default:
+			parts = append(parts, fmt.Sprintf("%d %ss", chunk.amount, chunk.singularName))
+			printedChunks++
+		}
+
+		if printedChunks >= 2 {
+			break
+		}
+	}
+
+	return strings.Join(parts, " ")
 }

@@ -2,6 +2,7 @@ package bitbadger
 
 import (
 	"errors"
+	"fmt"
 	"time"
 )
 
@@ -35,6 +36,10 @@ type PullRequestsInfo struct {
 	OpenCount       int
 	OldestOpenPR    time.Duration
 	OpenAverageTime time.Duration
+}
+
+func (info PullRequestsInfo) String() string {
+	return fmt.Sprintf("%d", info.OpenCount)
 }
 
 type RepositoryType int
