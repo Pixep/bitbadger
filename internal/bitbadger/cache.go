@@ -8,6 +8,7 @@ import (
 // check if a cache entry is still valid
 type CachePolicy struct {
 	ValidityDuration time.Duration
+	MaxCachedResults int
 }
 
 // CacheEntry holds the request, result
@@ -24,7 +25,14 @@ var cacheMap map[BadgeRequest]CacheEntry
 func init() {
 	cachePolicy = CachePolicy{
 		ValidityDuration: 10 * time.Minute,
+		MaxCachedResults: 100,
 	}
+
+	ClearCache()
+}
+
+// ClearCache clears the full cache content
+func ClearCache() {
 	cacheMap = make(map[BadgeRequest]CacheEntry)
 }
 
@@ -51,6 +59,27 @@ func CacheRequestResult(request BadgeRequest, image *BadgeImage) {
 		Request:     request,
 		ImageResult: image,
 		RefreshTime: time.Now(),
+	}
+
+	cleanupCache()
+}
+
+func cleanupCache() {
+	if cachePolicy.MaxCachedResults <= 0 && len(cacheMap) > 0 {
+		ClearCache()
+	}
+
+	// Find and remove oldest entry, until below threshold.
+	// Will definitely need a better implementation :)
+	for len(cacheMap) > cachePolicy.MaxCachedResults {
+		var oldestEntry *CacheEntry
+		for _, entry := range cacheMap {
+			if oldestEntry == nil || oldestEntry.RefreshTime.Before(entry.RefreshTime) {
+				oldestEntry = &entry
+			}
+		}
+
+		delete(cacheMap, oldestEntry.Request)
 	}
 }
 
