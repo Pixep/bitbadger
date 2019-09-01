@@ -48,6 +48,11 @@ func main() {
 			Usage: "Set for how long the requests should be cached in minutes",
 			Value: 0,
 		},
+		cli.IntFlag{
+			Name:  "maxcached",
+			Usage: "Set the maximum number of cached requests",
+			Value: 100,
+		},
 	}
 
 	app.Run(os.Args)
@@ -70,6 +75,7 @@ func start(c *cli.Context) error {
 
 	bitbadger.SetCachePolicy(bitbadger.CachePolicy{
 		ValidityDuration: time.Duration(c.Int("cachevalidity")) * time.Minute,
+		MaxCachedResults: c.Int("maxcached"),
 	})
 
 	log.Info("Serving badges as '", config.Username, "'")
