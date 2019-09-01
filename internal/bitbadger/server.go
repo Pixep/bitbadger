@@ -41,13 +41,14 @@ func handleHTTPRequest(w http.ResponseWriter, r *http.Request) {
 
 	badgeImage := GetCachedResult(*request)
 	if badgeImage == nil {
-		badgeImage, httpError = generateNewBadge(*request)
-		if httpError != nil {
-			http.Error(w, httpError.Message, httpError.HTTPErrorStatus)
+		newBadgeImage, err := GenerateBadge(*request)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusBadGateway)
 			return
 		}
 
 		CacheRequestResult(*request, badgeImage)
+		badgeImage = newBadgeImage
 	}
 
 	sendHTTPReponse(w, badgeImage)
@@ -80,37 +81,6 @@ func parseHTTPRequest(r *http.Request) (*BadgeRequest, *serverError) {
 		Repository: paths[1],
 		Type:       badgeType,
 	}, nil
-}
-
-func generateNewBadge(request BadgeRequest) (*BadgeImage, *serverError) {
-	prInfo, err := RetrieveBBPullRequestInfo(request)
-	if err != nil {
-		log.Error("Error while retrieving badge info: ", err)
-		return nil, &serverError{
-			Message:         "Error while getting pull request info from the upstream server",
-			HTTPErrorStatus: http.StatusBadGateway,
-		}
-	}
-
-	badge, err := GenerateBadgeInfo(request.Type, prInfo)
-	if err != nil {
-		log.Error("Failed to generate badge: ", err)
-		return nil, &serverError{
-			Message:         "Failed to generate badge",
-			HTTPErrorStatus: http.StatusInternalServerError,
-		}
-	}
-
-	badgeImage, err := DownloadBadge(badge)
-	if err != nil {
-		log.Error("Error downloading badge: ", err)
-		return nil, &serverError{
-			Message:         "Failed to download badge",
-			HTTPErrorStatus: http.StatusBadGateway,
-		}
-	}
-
-	return badgeImage, nil
 }
 
 func sendHTTPReponse(w http.ResponseWriter, badgeImage *BadgeImage) {

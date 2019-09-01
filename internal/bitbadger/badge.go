@@ -1,58 +1,42 @@
 package bitbadger
 
 import (
-	"fmt"
-	"io/ioutil"
-	"net/http"
-	"strings"
-
+	"errors"
 	log "github.com/Sirupsen/logrus"
 )
 
-// BadgeInfo holds information required
-// to generate a badge image
+// BadgeInfo holds information required to generate a badge image.
 type BadgeInfo struct {
 	Label   string
 	Message string
 	Color   string
 }
 
-// BadgeImage holds the badge image data and extension
+// BadgeImage holds the badge image data and extension.
 type BadgeImage struct {
 	Data      []byte
 	Extension string
 }
 
-// Label, message and color are '-' separated
-func generateBadgeURL(badge BadgeInfo) string {
-	badgetInfoURL := fmt.Sprintf("%s-%s-%s", badge.Label, badge.Message, badge.Color)
-	// Use ReplaceAll to have "%20" in place of spaces, as Golang encode uses "+" instead
-	return "https://img.shields.io/badge/" + strings.ReplaceAll(badgetInfoURL, " ", "%20")
-}
-
-// DownloadBadge downloads and returns a badge image
-// from "img.shields.io", using badgeInfo.
-func DownloadBadge(badgeInfo BadgeInfo) (*BadgeImage, error) {
-	// Get the data
-	badgeURL := generateBadgeURL(badgeInfo)
-	log.Debug("Badge URL = ", badgeURL)
-
-	resp, err := http.Get(badgeURL)
+// GenerateBadge generates a badge from a BadgeRequest.
+func GenerateBadge(request BadgeRequest) (*BadgeImage, error) {
+	prInfo, err := RetrieveBBPullRequestInfo(request)
 	if err != nil {
-		log.Error("Error while retrieving badge at '", badgeURL, "': ", err)
-		return nil, err
+		log.Error("Error while retrieving badge info: ", err)
+		return nil, errors.New("Error while getting pull request info from the upstream server")
 	}
-	defer resp.Body.Close()
 
-	body, err := ioutil.ReadAll(resp.Body)
+	badge, err := GenerateBadgeInfo(request.Type, prInfo)
 	if err != nil {
-		log.Error("Failed to read badge image response: ", err)
-		return nil, err
+		log.Error("Failed to generate badge: ", err)
+		return nil, errors.New("Failed to generate badge")
 	}
 
-	image := &BadgeImage{
-		Data:      body,
-		Extension: "svg+xml",
+	badgeImage, err := DownloadBadge(badge)
+	if err != nil {
+		log.Error("Error downloading badge: ", err)
+		return nil, errors.New("Failed to download badge")
 	}
-	return image, nil
+
+	return badgeImage, nil
 }

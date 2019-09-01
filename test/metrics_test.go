@@ -7,6 +7,32 @@ import (
 	"github.com/Pixep/bitbadger/internal/bitbadger"
 )
 
+func TestGetBadgeType(t *testing.T) {
+	cases := []struct {
+		in       string
+		expected bitbadger.BadgeType
+	}{
+		{"open-pr-count", bitbadger.OpenPRCountType},
+		{"avg-pr-time", bitbadger.AveragePRTimeType},
+		{"oldest-pr-time", bitbadger.OldestOpenPRTime},
+	}
+
+	for _, c := range cases {
+		badge, err := bitbadger.GetBadgeType(c.in)
+		if badge != c.expected {
+			t.Errorf("Incorrect BadgeType '%s' from string %s", badge, c.in)
+		}
+		if err != nil {
+			t.Errorf("Should not generate an error")
+		}
+	}
+
+	_, err := bitbadger.GetBadgeType("unknown")
+	if err == nil {
+		t.Errorf("Should generate an error")
+	}
+}
+
 func TestGenerateBadgeInfo(t *testing.T) {
 	badgeInfo, _ := bitbadger.GenerateBadgeInfo(bitbadger.OpenPRCountType, bitbadger.PullRequestsInfo{
 		OpenCount: 999,
