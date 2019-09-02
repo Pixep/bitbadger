@@ -4,17 +4,15 @@ import (
 	"bytes"
 	"testing"
 	"time"
-
-	"github.com/Pixep/bitbadger/internal/bitbadger"
 )
 
 func TestSetTestPolicy(t *testing.T) {
-	newPolicy := bitbadger.CachePolicy{
+	newPolicy := CachePolicy{
 		ValidityDuration: 66 * time.Minute,
 	}
-	bitbadger.SetCachePolicy(newPolicy)
+	SetCachePolicy(newPolicy)
 
-	currentPolicy := bitbadger.GetCachePolicy()
+	currentPolicy := GetCachePolicy()
 
 	if newPolicy != currentPolicy {
 		t.Errorf("Set/GetCachePolicy: Cache policies differ")
@@ -22,55 +20,55 @@ func TestSetTestPolicy(t *testing.T) {
 }
 
 func TestRequestCaching(t *testing.T) {
-	bitbadger.ClearCache()
-	bitbadger.SetCachePolicy(bitbadger.CachePolicy{
+	ClearCache()
+	SetCachePolicy(CachePolicy{
 		ValidityDuration: 2 * time.Minute,
 		MaxCachedResults: 100,
 	})
 
-	request1 := bitbadger.BadgeRequest{
+	request1 := BadgeRequest{
 		Username:   "test",
 		Repository: "repo",
-		Type:       bitbadger.OpenPRCountType,
+		Type:       OpenPRCountType,
 	}
-	request2 := bitbadger.BadgeRequest{
+	request2 := BadgeRequest{
 		Username:   "test",
 		Repository: "repo2",
-		Type:       bitbadger.OpenPRCountType,
+		Type:       OpenPRCountType,
 	}
-	request1bis := bitbadger.BadgeRequest{
+	request1bis := BadgeRequest{
 		Username:   "test",
 		Repository: "repo",
-		Type:       bitbadger.OpenPRCountType,
+		Type:       OpenPRCountType,
 	}
 
 	imageData := []byte("some-image")
 	imageExtension := "jpeg"
-	result := bitbadger.BadgeImage{
+	result := BadgeImage{
 		Data:      imageData,
 		Extension: imageExtension,
 	}
 
-	bitbadger.CacheRequestResult(request1, &result)
+	CacheRequestResult(request1, &result)
 
-	if !bitbadger.RequestCached(request1) {
+	if !RequestCached(request1) {
 		t.Errorf("RequestCached: Request 1 should be cached")
 	}
-	if !bitbadger.RequestCached(request1bis) {
+	if !RequestCached(request1bis) {
 		t.Errorf("RequestCached: Request 1 bis should be cached")
 	}
-	if bitbadger.RequestCached(request2) {
+	if RequestCached(request2) {
 		t.Errorf("RequestCached: Request 2 should not be cached")
 	}
 
-	cacheResult := bitbadger.GetCachedResult(request1)
+	cacheResult := GetCachedResult(request1)
 	if cacheResult == nil {
 		t.Errorf("GetCachedResult: Cache result should be valid")
 	}
-	if bitbadger.GetCachedResult(request1bis) == nil {
+	if GetCachedResult(request1bis) == nil {
 		t.Errorf("GetCachedResult: Cache result should be valid for request 1 bis")
 	}
-	if bitbadger.GetCachedResult(request2) != nil {
+	if GetCachedResult(request2) != nil {
 		t.Errorf("GetCachedResult: Other request should not be cached")
 	}
 
@@ -86,95 +84,95 @@ func TestRequestCaching(t *testing.T) {
 func TestCacheValidityDuration(t *testing.T) {
 	cacheValidityDuration := 2 * time.Second
 
-	bitbadger.ClearCache()
-	bitbadger.SetCachePolicy(bitbadger.CachePolicy{
+	ClearCache()
+	SetCachePolicy(CachePolicy{
 		ValidityDuration: cacheValidityDuration,
 		MaxCachedResults: 100,
 	})
 
-	request := bitbadger.BadgeRequest{
+	request := BadgeRequest{
 		Username:   "test",
 		Repository: "repo",
-		Type:       bitbadger.OpenPRCountType,
+		Type:       OpenPRCountType,
 	}
 
-	bitbadger.CacheRequestResult(request, &bitbadger.BadgeImage{})
+	CacheRequestResult(request, &BadgeImage{})
 
 	// Wait for cache to become invalid
 	time.Sleep(cacheValidityDuration + 1*time.Second)
 
-	if bitbadger.RequestCached(request) {
+	if RequestCached(request) {
 		t.Errorf("RequestCached: Cached request should not be valid")
 	}
 
-	if bitbadger.GetCachedResult(request) != nil {
+	if GetCachedResult(request) != nil {
 		t.Errorf("GetCachedResult: Cached result should not be valid")
 	}
 }
 
 func TestCacheMaxCount(t *testing.T) {
-	bitbadger.ClearCache()
-	bitbadger.SetCachePolicy(bitbadger.CachePolicy{
+	ClearCache()
+	SetCachePolicy(CachePolicy{
 		ValidityDuration: 10 * time.Minute,
 		MaxCachedResults: 2,
 	})
 
-	request1 := bitbadger.BadgeRequest{
+	request1 := BadgeRequest{
 		Username: "request1",
 	}
-	request2 := bitbadger.BadgeRequest{
+	request2 := BadgeRequest{
 		Username: "request2",
 	}
-	request3 := bitbadger.BadgeRequest{
+	request3 := BadgeRequest{
 		Username: "request3",
 	}
 
-	bitbadger.CacheRequestResult(request1, &bitbadger.BadgeImage{})
-	bitbadger.CacheRequestResult(request2, &bitbadger.BadgeImage{})
+	CacheRequestResult(request1, &BadgeImage{})
+	CacheRequestResult(request2, &BadgeImage{})
 
-	if !bitbadger.RequestCached(request1) {
+	if !RequestCached(request1) {
 		t.Errorf("RequestCached: Request1 should be cached")
 	}
-	if !bitbadger.RequestCached(request2) {
+	if !RequestCached(request2) {
 		t.Errorf("RequestCached: Request2 should be cached")
 	}
-	if bitbadger.RequestCached(request3) {
+	if RequestCached(request3) {
 		t.Errorf("RequestCached: Request3 should be not cached")
 	}
 
-	bitbadger.CacheRequestResult(request3, &bitbadger.BadgeImage{})
+	CacheRequestResult(request3, &BadgeImage{})
 
-	if bitbadger.RequestCached(request1) {
+	if RequestCached(request1) {
 		t.Errorf("RequestCached: Request1 should not be cached anymore")
 	}
-	if !bitbadger.RequestCached(request2) {
+	if !RequestCached(request2) {
 		t.Errorf("RequestCached: Request2 should be cached")
 	}
-	if !bitbadger.RequestCached(request3) {
+	if !RequestCached(request3) {
 		t.Errorf("RequestCached: Request3 should be cached")
 	}
 
-	bitbadger.CacheRequestResult(request2, &bitbadger.BadgeImage{})
+	CacheRequestResult(request2, &BadgeImage{})
 
-	if bitbadger.RequestCached(request1) {
+	if RequestCached(request1) {
 		t.Errorf("RequestCached: Request1 should not be cached anymore")
 	}
-	if !bitbadger.RequestCached(request2) {
+	if !RequestCached(request2) {
 		t.Errorf("RequestCached: Request2 should be cached")
 	}
-	if !bitbadger.RequestCached(request3) {
+	if !RequestCached(request3) {
 		t.Errorf("RequestCached: Request3 should be cached")
 	}
 
-	bitbadger.CacheRequestResult(request1, &bitbadger.BadgeImage{})
+	CacheRequestResult(request1, &BadgeImage{})
 
-	if !bitbadger.RequestCached(request1) {
+	if !RequestCached(request1) {
 		t.Errorf("RequestCached: Request1 should be cached")
 	}
-	if !bitbadger.RequestCached(request2) {
+	if !RequestCached(request2) {
 		t.Errorf("RequestCached: Request2 should be cached")
 	}
-	if bitbadger.RequestCached(request3) {
+	if RequestCached(request3) {
 		t.Errorf("RequestCached: Request3 should not be cached anymore")
 	}
 }
