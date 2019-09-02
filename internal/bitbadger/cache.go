@@ -90,7 +90,7 @@ func cacheEntryValid(entry *CacheEntry) bool {
 		return false
 	}
 
-	return time.Now().Sub(entry.RefreshTime) < cachePolicy.ValidityDuration
+	return time.Since(entry.RefreshTime) < cachePolicy.ValidityDuration
 }
 
 // RequestCached returns true if the request is cached and valid.

@@ -55,7 +55,13 @@ func main() {
 		},
 	}
 
-	app.Run(os.Args)
+	err := app.Run(os.Args)
+	if err != nil {
+		log.Error(err)
+		os.Exit(-1)
+	}
+
+	os.Exit(0)
 }
 
 func start(c *cli.Context) error {
@@ -82,19 +88,19 @@ func start(c *cli.Context) error {
 
 	if c.Bool("insecure") {
 		log.Info("Running in HTTP-mode")
-		bitbadger.ServeWithHTTP(c.Int("port"))
-	} else {
-		certFile := c.String("cert")
-		if certFile == "" {
-			log.Error("No certificate provided.")
-			return errors.New("No certificate was provided")
-		}
-
-		keyFile := c.String("key")
-		if keyFile == "" {
-			return errors.New("No private key was provided")
-		}
-		bitbadger.ServeWithHTTPS(c.Int("port"), certFile, keyFile)
+		return bitbadger.ServeWithHTTP(c.Int("port"))
 	}
-	return nil
+
+	certFile := c.String("cert")
+	if certFile == "" {
+		log.Error("No certificate provided.")
+		return errors.New("No certificate was provided")
+	}
+
+	keyFile := c.String("key")
+	if keyFile == "" {
+		return errors.New("No private key was provided")
+	}
+
+	return bitbadger.ServeWithHTTPS(c.Int("port"), certFile, keyFile)
 }

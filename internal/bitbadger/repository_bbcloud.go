@@ -156,10 +156,10 @@ func retrieveBBMergedPRInfo(request BadgeRequest) (mergedPRInfo, error) {
 	for _, pullRequest := range response.PullRequests {
 		// TODO: Use the activity feed of each PR instead. This value will be
 		// incorrect if the PR is updated after it has been merged.
-		createdOnTime, err := time.Parse(time.RFC3339, pullRequest.CreatedOn)
-		updatedOnTime, err := time.Parse(time.RFC3339, pullRequest.UpdatedOn)
-		if err != nil {
-			log.Error("Failed to parse time:", pullRequest.CreatedOn)
+		createdOnTime, createdOnErr := time.Parse(time.RFC3339, pullRequest.CreatedOn)
+		updatedOnTime, updatedOnErr := time.Parse(time.RFC3339, pullRequest.UpdatedOn)
+		if createdOnErr != nil || updatedOnErr != nil {
+			log.Error("Failed to parse time:", pullRequest.CreatedOn, " or ", pullRequest.UpdatedOn)
 		} else {
 			openTime := updatedOnTime.Sub(createdOnTime)
 			mergedPRTotalTime += openTime
