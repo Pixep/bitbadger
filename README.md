@@ -1,4 +1,5 @@
 # BitBadger
+[![Build Status](https://travis-ci.com/Pixep/bitbadger.svg?branch=master)](https://travis-ci.com/Pixep/bitbadger)
 [![Go Report Card](https://goreportcard.com/badge/github.com/Pixep/bitbadger)](https://goreportcard.com/report/github.com/Pixep/bitbadger)
 
 ## Description
