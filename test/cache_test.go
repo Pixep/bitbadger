@@ -74,7 +74,7 @@ func TestRequestCaching(t *testing.T) {
 		t.Errorf("GetCachedResult: Other request should not be cached")
 	}
 
-	if bytes.Compare(cacheResult.Data, imageData) != 0 {
+	if !bytes.Equal(cacheResult.Data, imageData) {
 		t.Errorf("GetCachedResult: Invalid image data")
 	}
 
