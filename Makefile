@@ -9,7 +9,7 @@ DOCKERFILE_DIR := $(WORKING_DIR)/build/package
 
 .DEFAULT_GOAL := build
 
-.PHONY: build push tests
+.PHONY: build push test
 
 install-deps:: ## Download and installs dependencies
 		@go get ./cmd/bitbadger/...
@@ -24,8 +24,8 @@ build-static-linux:: install-deps ## Builds a static linux binary
 			-a -ldflags '-extldflags "-static"' \
 				cmd/bitbadger/bitbadger.go
 
-tests:: ## Run tests
-		@cd test && go test
+test:: ## Run tests
+		@go test -v -race ./...
 
 install:: ## Build and install bitbadger locally
 		@cd cmd/bitbadger/ && go install .
