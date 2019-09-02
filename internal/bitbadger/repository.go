@@ -2,7 +2,6 @@ package bitbadger
 
 import (
 	"errors"
-	"fmt"
 	"time"
 )
 
@@ -20,10 +19,6 @@ type PullRequestsInfo struct {
 	OldestOpenPR       time.Duration
 	OpenAverageTime    time.Duration
 	AveragePRMergeTime time.Duration
-}
-
-func (info PullRequestsInfo) String() string {
-	return fmt.Sprintf("%d", info.OpenCount)
 }
 
 // RepositoryType holds the type of repository service targetted.
