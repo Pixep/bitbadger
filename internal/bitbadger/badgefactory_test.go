@@ -3,23 +3,21 @@ package bitbadger
 import (
 	"testing"
 	"time"
-
-	"github.com/Pixep/bitbadger/internal/bitbadger"
 )
 
 func TestGetBadgeType(t *testing.T) {
 	cases := []struct {
 		in       string
-		expected bitbadger.BadgeType
+		expected BadgeType
 	}{
-		{string(bitbadger.OpenPRCountType), bitbadger.OpenPRCountType},
-		{string(bitbadger.OpenPRAverageAgeType), bitbadger.OpenPRAverageAgeType},
-		{string(bitbadger.OldestOpenPRAge), bitbadger.OldestOpenPRAge},
-		{string(bitbadger.AveragePRMergeTime), bitbadger.AveragePRMergeTime},
+		{string(OpenPRCountType), OpenPRCountType},
+		{string(OpenPRAverageAgeType), OpenPRAverageAgeType},
+		{string(OldestOpenPRAge), OldestOpenPRAge},
+		{string(AveragePRMergeTime), AveragePRMergeTime},
 	}
 
 	for _, c := range cases {
-		badge, err := bitbadger.GetBadgeType(c.in)
+		badge, err := GetBadgeType(c.in)
 		if badge != c.expected {
 			t.Errorf("Incorrect BadgeType '%s' from string %s", badge, c.in)
 		}
@@ -28,7 +26,7 @@ func TestGetBadgeType(t *testing.T) {
 		}
 	}
 
-	_, err := bitbadger.GetBadgeType("unknown")
+	_, err := GetBadgeType("unknown")
 	if err == nil {
 		t.Errorf("Should generate an error")
 	}
@@ -36,27 +34,27 @@ func TestGetBadgeType(t *testing.T) {
 
 func TestGenerateBadgeInfo(t *testing.T) {
 	cases := []struct {
-		inType          bitbadger.BadgeType
-		inInfo          bitbadger.PullRequestsInfo
+		inType          BadgeType
+		inInfo          PullRequestsInfo
 		expectedLabel   string
 		expectedMessage string
 		expectedColor   string
 	}{
-		{bitbadger.OpenPRCountType, bitbadger.PullRequestsInfo{OpenCount: 999},
+		{OpenPRCountType, PullRequestsInfo{OpenCount: 999},
 			"Open PRs", "999", "red"},
-		{bitbadger.OpenPRAverageAgeType, bitbadger.PullRequestsInfo{
+		{OpenPRAverageAgeType, PullRequestsInfo{
 			OpenAverageTime: 5 * time.Minute},
 			"Avg. current PRs age", "5 mins", "green"},
-		{bitbadger.OldestOpenPRAge, bitbadger.PullRequestsInfo{
+		{OldestOpenPRAge, PullRequestsInfo{
 			OldestOpenPR: 5 * time.Minute},
 			"Oldest PR age", "5 mins", "green"},
-		{bitbadger.AveragePRMergeTime, bitbadger.PullRequestsInfo{
+		{AveragePRMergeTime, PullRequestsInfo{
 			AveragePRMergeTime: 5 * time.Minute},
 			"Avg. PR merge time", "5 mins", "green"},
 	}
 
 	for _, c := range cases {
-		badgeInfo, _ := bitbadger.GenerateBadgeInfo(c.inType, c.inInfo)
+		badgeInfo, _ := GenerateBadgeInfo(c.inType, c.inInfo)
 
 		if badgeInfo.Label != c.expectedLabel {
 			t.Errorf("Incorrect label for OpenPRCountType: %s", badgeInfo.Label)
@@ -69,7 +67,7 @@ func TestGenerateBadgeInfo(t *testing.T) {
 		}
 	}
 
-	_, err := bitbadger.GenerateBadgeInfo("invalid", bitbadger.PullRequestsInfo{})
+	_, err := GenerateBadgeInfo("invalid", PullRequestsInfo{})
 	if err == nil {
 		t.Errorf("Should generate an error")
 	}
