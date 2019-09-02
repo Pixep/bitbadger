@@ -12,10 +12,10 @@ func TestGetBadgeType(t *testing.T) {
 		in       string
 		expected bitbadger.BadgeType
 	}{
-		{"open-pr-count", bitbadger.OpenPRCountType},
-		{"avg-pr-time", bitbadger.AveragePRTimeType},
-		{"oldest-pr-time", bitbadger.OldestOpenPRTime},
-		{"avg-pr-merge-time", bitbadger.AveragePRMergeTime},
+		{string(bitbadger.OpenPRCountType), bitbadger.OpenPRCountType},
+		{string(bitbadger.OpenPRAverageAgeType), bitbadger.OpenPRAverageAgeType},
+		{string(bitbadger.OldestOpenPRAge), bitbadger.OldestOpenPRAge},
+		{string(bitbadger.AveragePRMergeTime), bitbadger.AveragePRMergeTime},
 	}
 
 	for _, c := range cases {
@@ -44,10 +44,10 @@ func TestGenerateBadgeInfo(t *testing.T) {
 	}{
 		{bitbadger.OpenPRCountType, bitbadger.PullRequestsInfo{OpenCount: 999},
 			"Open PRs", "999", "red"},
-		{bitbadger.AveragePRTimeType, bitbadger.PullRequestsInfo{
+		{bitbadger.OpenPRAverageAgeType, bitbadger.PullRequestsInfo{
 			OpenAverageTime: 5 * time.Minute},
 			"Avg. current PRs age", "5 mins", "green"},
-		{bitbadger.OldestOpenPRTime, bitbadger.PullRequestsInfo{
+		{bitbadger.OldestOpenPRAge, bitbadger.PullRequestsInfo{
 			OldestOpenPR: 5 * time.Minute},
 			"Oldest PR age", "5 mins", "green"},
 		{bitbadger.AveragePRMergeTime, bitbadger.PullRequestsInfo{

@@ -103,7 +103,7 @@ func retrieveBBOpenPRInfo(request BadgeRequest) (openPRInfo, error) {
 	}
 
 	openPRTotalTime := time.Duration(0)
-	oldestOpenPRTime := time.Duration(0)
+	oldestOpenPRAge := time.Duration(0)
 
 	now := time.Now()
 	prsWithValidTime := 0
@@ -114,8 +114,8 @@ func retrieveBBOpenPRInfo(request BadgeRequest) (openPRInfo, error) {
 		} else {
 			openTime := now.Sub(createdOnTime)
 
-			if openTime > oldestOpenPRTime {
-				oldestOpenPRTime = openTime
+			if openTime > oldestOpenPRAge {
+				oldestOpenPRAge = openTime
 			}
 
 			openPRTotalTime += openTime
@@ -131,7 +131,7 @@ func retrieveBBOpenPRInfo(request BadgeRequest) (openPRInfo, error) {
 
 	return openPRInfo{
 		OpenCount:       response.PullRequestsCount,
-		OldestOpenPR:    oldestOpenPRTime,
+		OldestOpenPR:    oldestOpenPRAge,
 		OpenAverageTime: openPRAverageTime,
 	}, nil
 }

@@ -15,10 +15,10 @@ type BadgeType string
 const (
 	// OpenPRCountType shows the number of open PRs.
 	OpenPRCountType BadgeType = "open-pr-count"
-	// AveragePRTimeType shows the average age of currently open PRs.
-	AveragePRTimeType BadgeType = "avg-pr-time"
-	// OldestOpenPRTime shows the age of the oldest currently open PR.
-	OldestOpenPRTime BadgeType = "oldest-pr-time"
+	// OpenPRAverageAgeType shows the average age of currently open PRs.
+	OpenPRAverageAgeType BadgeType = "open-pr-avg-age"
+	// OldestOpenPRAge shows the age of the oldest currently open PR.
+	OldestOpenPRAge BadgeType = "oldest-open-pr-age"
 	// AveragePRMergeTime shows average merge time of recent PRs.
 	AveragePRMergeTime BadgeType = "avg-pr-merge-time"
 )
@@ -32,14 +32,18 @@ func GetBadgeType(badgeString string) (BadgeType, error) {
 	}
 
 	return badgeType, errors.New("Invalid badge type '" + badgeString + "'." +
-		"Badge type can be 'open-pr-count', 'avg-pr-time', 'oldest-pr-time', or 'avg-pr-merge-time'")
+		"Badge type can be one of '" +
+		string(OpenPRCountType) + "', '" +
+		string(OpenPRAverageAgeType) + "', '" +
+		string(OldestOpenPRAge) + "', '" +
+		string(AveragePRMergeTime) + "'.")
 }
 
 // BadgeTypeValid returns true if the BadgeType provided is valid, false
 // otherwise.
 func BadgeTypeValid(badgeType BadgeType) bool {
 	switch badgeType {
-	case OpenPRCountType, AveragePRTimeType, OldestOpenPRTime, AveragePRMergeTime:
+	case OpenPRCountType, OpenPRAverageAgeType, OldestOpenPRAge, AveragePRMergeTime:
 		return true
 	default:
 		return false
@@ -52,10 +56,10 @@ func GenerateBadgeInfo(badgeType BadgeType, prInfo PullRequestsInfo) (BadgeInfo,
 	switch badgeType {
 	case OpenPRCountType:
 		return generateOpenPRCountBadge(prInfo), nil
-	case AveragePRTimeType:
+	case OpenPRAverageAgeType:
 		return generateAveragePRTimeBadge(prInfo), nil
-	case OldestOpenPRTime:
-		return generateOldestOpenPRTimeBadge(prInfo), nil
+	case OldestOpenPRAge:
+		return generateOldestOpenPRAgeBadge(prInfo), nil
 	case AveragePRMergeTime:
 		return generateAveragePRMergeTimeBadge(prInfo), nil
 	default:
@@ -93,7 +97,7 @@ func generateAveragePRTimeBadge(prInfo PullRequestsInfo) BadgeInfo {
 	}
 }
 
-func generateOldestOpenPRTimeBadge(prInfo PullRequestsInfo) BadgeInfo {
+func generateOldestOpenPRAgeBadge(prInfo PullRequestsInfo) BadgeInfo {
 	return BadgeInfo{
 		Label:   "Oldest PR age",
 		Message: printDuration(prInfo.OldestOpenPR),
